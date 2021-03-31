@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Route } from "react-router-dom";
+import { Link, Route } from "react-router-dom";
 import SavedList from "./Movies/SavedList";
 import MovieList from "./Movies/MovieList";
 import Movie from "./Movies/Movie";
 import axios from 'axios';
+import UpdateMovieForm from "./components/UpdateMovieForm";
+import NewMovieForm from "./Movies/NewMovieForm";
 
 const App = () => {
   const [savedList, setSavedList] = useState([]);
@@ -20,12 +22,27 @@ const App = () => {
     setSavedList([...savedList, movie]);
   };
 
+  const updateMovieInList = movie => {
+      let movieInList = movieList.find(movieInList => movieInList.id == movie.id)
+      movieInList.metascore = movie.metascore;
+      movieInList.title = movie.title;
+      movieInList.director = movie.director;
+      movieInList.stars = movie.stars;
+      
+      setMovieList([...movieList])
+  }
+
+  const deleteMovie = (id) => {
+    setMovieList(movieList.filter(movie=>(movie.id !== Number(id))));
+  }
+
   useEffect(() => {
     getMovieList();
   }, []);
 
   return (
     <>
+      <Link to="/add-movie">Add Movie</Link>
       <SavedList list={savedList} />
 
       <Route exact path="/">
@@ -33,8 +50,11 @@ const App = () => {
       </Route>
 
       <Route path="/movies/:id">
-        <Movie addToSavedList={addToSavedList} />
+        <Movie addToSavedList={addToSavedList} deleteMovie={deleteMovie}/>
       </Route>
+      <Route path="/movies/:id/update" 
+      render= {props => <UpdateMovieForm {...props} updateMovieInList={updateMovieInList}/>} />
+      <Route path="/add-movie" component={NewMovieForm} />
     </>
   );
 };
